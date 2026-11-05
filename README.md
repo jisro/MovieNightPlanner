@@ -1,4 +1,4 @@
-# Huisbioscoop
+# Movie Night Planner
 
 A lightweight movie voting app built for our biweekly home cinema nights.
 
