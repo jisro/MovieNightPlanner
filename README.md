@@ -1,74 +1,40 @@
 # Huisbioscoop
 
-A tiny app for a fixed group of 5 people to suggest and vote on movies for a
-home cinema night that happens every 2 weeks on a Thursday, plus a comment
-thread per night.
+A lightweight movie voting app built for our biweekly home cinema nights.
 
-- "Login" = tap your name. No passwords, no accounts.
-- Suggest a movie for the next (or any) edition.
-- Vote "Mee eens" (I agree) on someone else's pick.
-- Comment on a specific movie night.
-- Data (suggestions, votes, comments) is shared and stored in Upstash Redis,
-  so everyone sees the same thing regardless of device.
+**Live:** [thuisbios.vercel.app](https://thuisbios.vercel.app)
 
-## 1. Create the Redis database (Upstash)
+## What it does
 
-The easiest path is through Vercel, since it wires up the environment
-variables automatically:
+Every two weeks on Thursday, five of us watch a movie together. This app lets us:
 
-1. Go to your project on [vercel.com](https://vercel.com) → **Storage** tab
-   → **Create Database** → choose **Upstash** → **Redis**.
-2. Connect it to this project. Vercel will automatically add
-   `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to your project's
-   environment variables.
+- **Suggest movies** for upcoming nights
+- **Vote** on each other's suggestions ("Mee eens" = I agree)
+- **Comment** on specific movie nights
+- **No authentication** — just tap your name to "log in"
 
-(Alternatively, create a free database directly at
-[upstash.com](https://upstash.com) and copy the REST URL and token from its
-dashboard into your environment variables manually.)
+The schedule auto-generates every 14 days from a fixed anchor date (first Thursday after Jan 1, 2025), so there's no manual date entry.
 
-## 2. Run it locally
+## Design
 
-```bash
-npm install
-cp .env.local.example .env.local
-# fill in UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in .env.local
-npm run dev
-```
+Cinema-ticket aesthetic: velvet red, marquee gold, and a perforated stub. All styling is vanilla CSS with a focus on tactile, nostalgic UI.
 
-Open http://localhost:3000.
+## Tech stack
 
-## 3. Push to GitHub
+- **Next.js** (App Router)
+- **Upstash Redis** — all data (suggestions, votes, comments) stored as JSON per edition key: `edition:YYYY-MM-DD`
+- **Vercel** — deployed with automatic Redis integration
+- **No authentication layer** — identity is just a name in localStorage
 
-```bash
-git init
-git add .
-git commit -m "Huisbioscoop"
-git branch -M main
-git remote add origin https://github.com/<your-username>/huisbioscoop.git
-git push -u origin main
-```
+## Data model
 
-## 4. Deploy to Vercel
+Each movie night is one Redis key holding:
+- List of suggested movies with vote counts
+- Comment thread
+- Date metadata
 
-1. On [vercel.com](https://vercel.com), **Add New Project** → import the
-   GitHub repo you just pushed.
-2. If you didn't set up storage via Vercel in step 1, add
-   `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` under
-   **Settings → Environment Variables**.
-3. Deploy. That's it — no other config needed.
+No users table, no sessions — this is intentionally minimal for a fixed group of five.
 
-## Customizing
+---
 
-- **Who can log in**: edit the `USERS` array in `lib/dates.js`.
-- **Schedule**: editions are calculated from a fixed anchor date in
-  `lib/dates.js` (first Thursday on/after 2025-01-01), stepping every 14
-  days forever. Change the anchor there if you want the cycle to shift.
-- **Look and feel**: all styling is in `app/globals.css` (cinema-ticket
-  theme — velvet red, marquee gold, paper ticket with a stub).
-
-## How data is stored
-
-Each edition is one Redis key, `edition:YYYY-MM-DD`, holding its movies
-(with votes) and comments as JSON. There's no user accounts table — "who
-you are" is just a name held in the browser's local storage after you tap
-a seat.
+Built for my home cinema group. If you're one of the five and reading this: yes, I over-engineered our movie nights.
